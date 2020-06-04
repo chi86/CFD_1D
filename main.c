@@ -79,7 +79,7 @@ void Initialisation(scalar ReTau0,scalar PrW0) {
 }
 
 
-void Simulation() {
+void Simulation(scalar CmuKv2f_0,scalar sigmaE_0,scalar CE2_0,scalar CL_0,scalar Ceta_0,scalar C1_0,scalar C2_0) {
   int t;
   //int f;
   scalar residuum;
@@ -106,7 +106,7 @@ void Simulation() {
   //for(f=0; f<1; f+=1) {
   while(residuum>RES_MIN) {
 #if !LAMINAR
-    kEv2f(mesh);
+    kEv2f(mesh,CmuKv2f_0,sigmaE_0,CE2_0,CL_0,Ceta_0,C1_0,C2_0);
 #endif
 
     Predict_h(mesh);
@@ -168,6 +168,8 @@ int main(int argc, char *argv[]) {
   struct timespec before, after;
   long elapsed_secs;
   scalar ReTau0,PrW0;
+
+  scalar CmuKv2f_0,sigmaE_0,CE2_0,CL_0,Ceta_0,C1_0,C2_0;
   
   
   printf("\n1D CDF routine\n");
@@ -186,8 +188,38 @@ int main(int argc, char *argv[]) {
   }
   printf("ReTau=%f, PrW=%f\n",ReTau0,PrW0);
 
+
+  if(argc>3) {
+    CmuKv2f_0 =strtof(argv[3],NULL);
+    sigmaE_0  =strtof(argv[4],NULL);
+    CE2_0     =strtof(argv[5],NULL);
+    CL_0      =strtof(argv[6],NULL);
+    Ceta_0    =strtof(argv[7],NULL);
+    C1_0      =strtof(argv[8],NULL);
+    C2_0      =strtof(argv[9],NULL);
+  }
+  else {
+    CmuKv2f_0 = 0.22;
+    sigmaE_0  = 1.3;
+    CE2_0     = 1.9;
+    CL_0      = 0.23;
+    Ceta_0    = 70.0;
+    C1_0      = 1.4;
+    C2_0      = 0.3;
+  }
+  printf("CmuKv2f_0=%f\n",CmuKv2f_0);
+  printf("sigmaE_0=%f\n",sigmaE_0);
+  printf("CE2_0=%f\n",CE2_0);
+  printf("CL_0=%f\n",CL_0);
+  printf("Ceta_0=%f\n",Ceta_0);
+  printf("C1_0=%f\n",C1_0);
+  printf("C2_0=%f\n",C2_0);
+  printf("\n");
+
+  
+
   Initialisation(ReTau0,PrW0);
-  Simulation();
+  Simulation(CmuKv2f_0,sigmaE_0,CE2_0,CL_0,Ceta_0,C1_0,C2_0);
 
 
   clock_gettime(CLOCK_REALTIME, &after);

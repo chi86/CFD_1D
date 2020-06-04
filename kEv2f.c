@@ -7,7 +7,13 @@
 /*
  * muT & aT based on the k-epsilon-v2-f-model
  */
-void kEv2f(Mesh *mesh) {
+void kEv2f(Mesh *mesh, scalar CmuKv2f_0,
+	               scalar sigmaE_0,
+	               scalar CE2_0,
+	               scalar CL_0,
+	               scalar Ceta_0,
+	               scalar C1_0,
+	               scalar C2_0) {
   
   /* Medic, G. and Durbin, P.A., */
   /* "Towards improved prediction of heat transfer on turbine blades", */
@@ -64,14 +70,20 @@ void kEv2f(Mesh *mesh) {
   CT      = 6.0;
 
   // defined as "model constant"
-  CmuKv2f = 0.22;
-  sigmaE  = 1.3;
-  CE2     = 1.9;
-  CL      = 0.23;
-  Ceta    = 70.0;
-  C1      = 1.4;
-  C2      = 0.3;
-
+  /* CmuKv2f = 0.22; */
+  /* sigmaE  = 1.3; */
+  /* CE2     = 1.9; */
+  /* CL      = 0.23; */
+  /* Ceta    = 70.0; */
+  /* C1      = 1.4; */
+  /* C2      = 0.3; */
+  CmuKv2f = CmuKv2f_0;
+  sigmaE  = sigmaE_0;
+  CE2     = CE2_0;
+  CL      = CL_0;
+  Ceta    = Ceta_0;
+  C1      = C1_0;
+  C2      = C2_0;
 
 
   

@@ -24,7 +24,7 @@ def main():
     filenameDNS=os.environ['DNS']+"/Var_Re360Pr20/"
     DNS_V=dns.readDNSdataVar(filenameDNS)
 
-    CFD1D=readJasmin1D()
+    CFD1D=readCFD1D()
     
 
     PostProcess([CFD1D,DNS_C,DNS_V],["w","chi","k","epsilon","Zeta","psi","muT","aT","tauL","tauT","qL","qT"])
