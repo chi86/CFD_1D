@@ -1,8 +1,17 @@
 # CFD_1D
 CFD code for 1D channel/pipe flow
+fluid material properties based on
 
-work in progress
+"C Irrenfried, Convective turbulent near wall heat transfer at high Prandtl numbers: A modelling approach based on Direct Numerical Simulations and experiments"
+
+https://diglib.tugraz.at/convective-turbulent-near-wall-heat-transfer-at-high-prandtl-numbers-2020
+
+
+## work in progress
 - postprocessing routin not yet public available, all results are put into "data.dat"
+
+
+
 
 
 # Compilation
