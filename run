@@ -1,0 +1,28 @@
+#!/bin/bash
+
+export NO_AT_BRIDGE=1
+set -e
+
+os=$(cat /etc/os-release | grep NAME)
+if [[ $os == *"CentOS"* ]]; then
+    echo "It's CentOS";
+    source /opt/rh/devtoolset-7/enable
+fi
+
+make debug -B
+#make verbose -B
+
+
+./CFD_1D
+    
+if [ "1" ];
+then
+    echo "post.py"
+    python3 post.py
+    gnuplot post.gp
+
+    #echo "evince"
+    #evince post.pdf&
+    #evince LT.pdf&
+fi
+

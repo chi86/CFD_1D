@@ -1,0 +1,177 @@
+#! python3
+
+import copy,os,math,sys
+sys.path.append(os.environ['PYTHONPATH']+"/")
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+from cell import Cell
+from mesh import Mesh
+from fluidProps import FluidPopsRef
+import rans
+import dns
+from postProcess import PostProcess
+
+import warnings
+warnings.simplefilter("ignore")
+
+def main():
+    ## DNS const data
+    filenameDNS=os.environ['DNS']+"/re360pr20/"
+    DNS_C=dns.readDNSdataConst(filenameDNS)
+    
+    filenameDNS=os.environ['DNS']+"/Var_Re360Pr20/"
+    DNS_V=dns.readDNSdataVar(filenameDNS)
+
+
+    ##PostProcess([DNS_C,DNS_V],["w","chi","muT","aT","k","epsilon","tauL","tauT","Zeta","qL","qT","psi"])
+    
+    j1D=readJasmin1D()
+    
+    # pecnik=readPecnik()
+
+    # pecnikDNS=readPecnikDNS()
+    
+
+    #print(j1D.plot_yp())
+
+
+    #PostProcess([j1D,DNS_C],["w","chi","k","epsilon","Zeta","psi","muT","aT","tauL","tauT","qL","qT"])
+    PostProcess([j1D,DNS_V],["w","chi","k","epsilon","Zeta","psi","muT","aT","tauL","tauT","qL","qT"])
+
+
+
+
+def readJasmin1D():
+    data = np.loadtxt("data.dat", skiprows=1)
+    imax=len(data)
+    j1D=Mesh(imax)
+
+    j1D.typ="data"
+
+    for idx,val in enumerate(data[:]):
+        j1D.cells[idx+1].ru=val[0]
+        j1D.cells[idx+1].rp=val[1]
+        j1D.cells[idx+1].dr=val[2]
+        j1D.cells[idx+1].yp=val[3]
+
+        j1D.cells[idx+1].w=val[4]
+        j1D.cells[idx+1].theta=val[5]
+        j1D.cells[idx+1].chi=val[6]
+        
+        j1D.cells[idx+1].k=val[7]
+        j1D.cells[idx+1].epsilon=val[8]
+        j1D.cells[idx+1].Zeta=val[9]
+        j1D.cells[idx+1].psi=val[10]
+        j1D.cells[idx+1].V2=val[19]
+        j1D.cells[idx+1].muT=val[11]
+        
+        j1D.cells[idx+1].L=val[12]
+        j1D.cells[idx+1].T=val[13]
+        
+        j1D.cells[idx+1].aT=val[14]
+        
+        j1D.cells[idx+1].tauL=val[15]
+        j1D.cells[idx+1].tauT=val[16]
+        
+        j1D.cells[idx+1].qL=val[17]
+        j1D.cells[idx+1].qT=val[18]
+
+    return j1D
+
+def readPecnik():
+    data = np.loadtxt("RANS_Channel/python/Pecnik_channel.dat", skiprows=1)
+    imax=len(data)
+    mesh=Mesh(imax)
+
+    mesh.typ="Pecnik"
+
+    for idx,val in enumerate(data[:]):
+        mesh.cells[idx+1].ru=0.0
+        mesh.cells[idx+1].rp=0.0
+        mesh.cells[idx+1].dr=0.0
+        mesh.cells[idx+1].yp=val[0]
+
+        mesh.cells[idx+1].w=val[1]
+        mesh.cells[idx+1].theta=0.0
+        mesh.cells[idx+1].chi=val[2]
+        
+        mesh.cells[idx+1].k=val[6]
+        mesh.cells[idx+1].epsilon=val[7]
+        mesh.cells[idx+1].Zeta=0.0
+        mesh.cells[idx+1].psi=val[10]
+        mesh.cells[idx+1].V2=val[11]
+        mesh.cells[idx+1].muT=val[5]*395.0
+    
+
+        mesh.cells[idx+1].L=val[9]
+        mesh.cells[idx+1].T=val[8]
+        
+        mesh.cells[idx+1].aT=0.0
+        
+        mesh.cells[idx+1].tauL=0.0
+        mesh.cells[idx+1].tauT=0.0
+        
+        mesh.cells[idx+1].qL=0.0
+        mesh.cells[idx+1].qT=0.0
+        
+    return mesh
+
+def readPecnikDNS():
+    data = np.loadtxt("DNS_data/constProperty.txt", skiprows=88)
+
+    #print(data)
+
+    
+    imax=len(data)
+    mesh=Mesh(imax)
+
+    mesh.ReTau=395.0
+
+    mesh.typ="Pecnik"
+
+    for idx,val in enumerate(data[:]):
+        mesh.cells[idx+1].ru=0.0
+        mesh.cells[idx+1].rp=0.0
+        mesh.cells[idx+1].dr=0.0
+        mesh.cells[idx+1].yp=val[1]
+
+        mesh.cells[idx+1].w=val[10]
+        mesh.cells[idx+1].theta=0.0
+        mesh.cells[idx+1].chi=val[13]
+        
+        mesh.cells[idx+1].k=0.5*np.sqrt(val[25]+val[26]+val[27])
+        mesh.cells[idx+1].epsilon=-val[29]
+        mesh.cells[idx+1].Zeta=0.0
+        mesh.cells[idx+1].psi=0.0
+        mesh.cells[idx+1].muT=abs(val[21])
+        
+        mesh.cells[idx+1].L=0.0
+        mesh.cells[idx+1].T=0.0
+        
+        mesh.cells[idx+1].aT=0.0
+        
+        mesh.cells[idx+1].tauL=0.0
+        mesh.cells[idx+1].tauT=0.0
+        
+        mesh.cells[idx+1].qL=0.0
+        mesh.cells[idx+1].qT=0.0
+
+
+    mesh.boundFlow()
+
+    for i in range(1,mesh.imax+1):
+        #i=i+1
+        dwP=(mesh.cells[i+1].w-mesh.cells[i  ].w)/(mesh.cells[i+1].yp-mesh.cells[i  ].yp)
+        dwM=(mesh.cells[i  ].w-mesh.cells[i-1].w)/(mesh.cells[i  ].yp-mesh.cells[i-1].yp)
+        dw=0.5*(dwP+dwM)
+        mesh.cells[i].muT/=abs(dw)
+        #print(i,mesh.cells[i].muT)
+        
+    return mesh
+
+
+if __name__ == '__main__':
+
+    main()
